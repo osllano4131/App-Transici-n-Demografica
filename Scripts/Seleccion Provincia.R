@@ -14,8 +14,7 @@ censo <- spark_read_csv(sc,"../../Data/CPV2010M_CSV_Nacional/CPV2010M_Poblacion.
 censo %>%
   filter(I01 == 8) %>%
   select(I01,I02,URP,P01,P02,P03) -> Esmeraldas
-  group_by(URP) %>%
-
+  
 # Cargar A Memoria
 Esmeraldas <- collect(Esmeraldas)
 
