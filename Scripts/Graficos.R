@@ -133,30 +133,6 @@ esmeraldas01 %>%
   piramide()
 
 
-#Haga un gráfico de la pirámide etaria de la provincia, incluya la tabla cruzada que
-#genera esa pirámide.
-
-esmeraldas01 %>%
-  mutate(Grupo_Etario = cut_width(P03,width = 4, boundary = 0,closed = "left")) %>%
-  group_by(Grupo_Etario,P01) %>%
-  count() %>%   
-  spread(key=P01,value = n) %>%
-  mutate(
-    Hombre = ifelse(is.na(Hombre),0,Hombre),
-    Mujer = ifelse(is.na(Mujer),0,Mujer)) %>%
-  ungroup() %>%
-  mutate(Masculinidad = (Hombre/Mujer)*100,
-         Total = Hombre+Mujer,
-         tot = sum(Total,na.rm = T),
-         Hombre = (Hombre/tot)*100,
-         Mujer = (Mujer/tot)*100) %>%
-  select(-c(tot,Masculinidad)) %>%
-  pivot_longer(cols = c("Hombre", "Mujer"),
-               names_to = "Sexo",
-               values_to = "Poblacion por Sexo") %>%
-  piramide()
-
-
 # Haga un gráfico en el que se observen superpuestas dos pirámides etarias de la
 # misma provincia: una urbana y otra rural. Incluya las tablas cruzadas que generan
 # estas pirámides
@@ -205,26 +181,19 @@ Edad_Urbana[,c(1,3,4)] %>%
   left_join(Edad_Rural[,c(1,4)],by = "Grupo_Etario") %>%
   rename(
     Pob_Urbana=`Poblacion por Sexo.x`,
-    Pob_Rural= `Poblacion por Sexo.y`) %>%
-  mutate(
-    Pob_R = Pob_Urbana+Pob_Rural
-  )-> Edad_Zona
+    Pob_Rural= `Poblacion por Sexo.y`) -> Edad_Zona
 
 Edad_Urbana %>%
   ggplot(aes(x = Grupo_Etario,y= `Poblacion por Sexo`
              )) +
   geom_bar(data = subset(Edad_Rural,Sexo == "Hombre") %>% mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
-           aes(color = "Hombre Rural"),
-           stat = "identity", width = 0.75,
-           #fill = "deepskyblue3"
-  ) +
+           aes(fill = "Hombre Rural"),
+           stat = "identity", width = 0.75 ) +
   geom_bar(data = subset(Edad_Rural, Sexo == "Mujer"),
-           aes(color = "Mujer Rural"),
-           stat = "identity", width = 0.75,
-           #fill = "darksalmon"
-  ) +
+           aes(fill = "Mujer Rural"),
+           stat = "identity", width = 0.75) +
   geom_bar(data = subset(Edad_Urbana,Sexo == "Hombre") %>% mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
-           aes(fill = "Hombre_Urbano",y=`Poblacion por Sexo`),
+           aes(fill = "Hombre Urbano",y=`Poblacion por Sexo`),
            stat = "identity", width = 0.75, 
             ) +
   geom_bar(data = subset(Edad_Urbana, Sexo == "Mujer"),
@@ -235,10 +204,10 @@ Edad_Urbana %>%
   coord_flip() +
   ggthemes::theme_tufte() +
   theme(plot.title = element_text(hjust = 0.5, size = 20)) +
-  labs(title = "Pirámide Poblacional",
+  labs(title = "Pirámide Poblacional Esmeraldas",
        x = "Años",
        y = "Hombres                        Mujeres",
-       caption = "Fuente: ---") +
+       caption = "Fuente: Censo 2010") +
   scale_y_continuous(
     breaks = seq(-7,7, by = 1),
     labels = paste0(c(seq(-7, 0, by = 1)*-1, seq(1, 7, by = 1)), "%"))
